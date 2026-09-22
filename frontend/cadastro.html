@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Crie sua conta na MoedaX e acompanhe moedas e criptomoedas." />
+  <title>MoedaX | Cadastro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script type="module">
+    import { mountMoedaxLogos } from './javascript/moedax-logo.js';
+    mountMoedaxLogos();
+  </script>
+  <script type="module" src="javascript/cadastro.js"></script>
+</head>
+<body class="auth-page auth-page--cadastro">
+  <header class="auth-header auth-header--cadastro">
+    <a class="auth-brand auth-brand-corner" href="login.html">
+      <span class="logo-slot logo-slot--sm" data-moedax-logo="decorative"></span>
+    </a>
+    <a class="auth-brand auth-brand-center" href="login.html" aria-hidden="true" tabindex="-1">
+      <span class="logo-slot" data-moedax-logo data-logo-title="MoedaX"></span>
+    </a>
+  </header>
+
+  <main class="auth-main">
+    <div class="auth-card auth-card--cadastro">
+      <section class="auth-info auth-info--cadastro" aria-label="Benefícios da MoedaX">
+        <span class="logo-slot logo-slot--panel" data-moedax-logo="decorative"></span>
+        <h1>Crie sua conta</h1>
+        <p class="auth-lead">Comece agora a comparar suas moedas e investimentos de forma simples e segura.</p>
+        <ul class="auth-features">
+          <li>
+            <img src="imagens/icon-cotacoes.svg" alt="" class="auth-feature-icon" width="48" height="48" />
+            <span>Acompanhe cotações em tempo real de moedas e criptomoedas</span>
+          </li>
+          <li>
+            <img src="imagens/icon-comparar.svg" alt="" class="auth-feature-icon" width="48" height="48" />
+            <span>Compare ativos e veja o histórico de variações</span>
+          </li>
+          <li>
+            <img src="imagens/icon-favoritos.svg" alt="" class="auth-feature-icon" width="48" height="48" />
+            <span>Monte sua lista de favoritos e receba insights</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="auth-panel-form auth-panel-form--cadastro" aria-labelledby="registerTitle">
+        <div class="auth-form-block auth-form-block--cadastro">
+          <h2 id="registerTitle">Dados pessoais</h2>
+
+          <div id="authMessage" class="auth-message error" hidden role="alert"></div>
+
+          <form id="registerForm" class="auth-form auth-form--cadastro" novalidate>
+            <div class="field">
+              <i data-lucide="user" class="field-icon" aria-hidden="true"></i>
+              <input id="fullName" name="full_name" type="text" autocomplete="name" placeholder="Nome completo" required />
+            </div>
+            <div class="field">
+              <i data-lucide="mail" class="field-icon" aria-hidden="true"></i>
+              <input id="email" name="email" type="email" autocomplete="email" placeholder="E-mail" required />
+            </div>
+            <div class="field field--toggle">
+              <i data-lucide="lock" class="field-icon" aria-hidden="true"></i>
+              <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Senha" required minlength="6" />
+              <button type="button" class="field-toggle" data-toggle-password="#password" aria-label="Mostrar senha">
+                <i data-lucide="eye-off"></i>
+              </button>
+            </div>
+            <div class="field field--toggle">
+              <i data-lucide="lock" class="field-icon" aria-hidden="true"></i>
+              <input id="confirmPassword" name="confirm_password" type="password" autocomplete="new-password" placeholder="Confirmar senha" required minlength="6" />
+              <button type="button" class="field-toggle" data-toggle-password="#confirmPassword" aria-label="Mostrar senha">
+                <i data-lucide="eye-off"></i>
+              </button>
+            </div>
+
+            <p class="field-group-label">Tipo de conta</p>
+            <div class="radio-group" role="radiogroup" aria-label="Tipo de conta">
+              <label class="radio-label">
+                <input type="radio" name="account_type" value="investidor" checked />
+                <span class="radio-custom" aria-hidden="true"></span>
+                Investidor
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="account_type" value="administrador" />
+                <span class="radio-custom" aria-hidden="true"></span>
+                Administrador
+              </label>
+            </div>
+
+            <button id="registerSubmit" class="btn-primary" type="submit">
+              <span>Cadastrar</span>
+              <span class="btn-arrow" aria-hidden="true"><i data-lucide="arrow-right"></i></span>
+            </button>
+          </form>
+
+          <p class="auth-footer-text auth-footer-text--cadastro">
+            Já tem uma conta? <a href="login.html">Entrar</a>
+          </p>
+
+          <p class="auth-legal">
+            Ao se cadastrar, você concorda com os
+            <a href="#">Termos de Uso</a> e
+            <a href="#">Política de Privacidade</a>.
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
