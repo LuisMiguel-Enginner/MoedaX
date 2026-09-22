@@ -23,14 +23,14 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
-      <a class="brand" href="#top">
+      <button class="brand brand-toggle" type="button" id="sidebarBrandToggle" aria-label="Recolher ou expandir menu">
         <span class="logo-slot logo-slot--sidebar" data-moedax-logo data-logo-title="MoedaX"></span>
-      </a>
+      </button>
 
       <nav class="main-nav" aria-label="Navegação principal">
         <p class="nav-label">Workspace</p>
         <a class="nav-item active" href="#overview"><i data-lucide="layout-dashboard"></i><span>Visão geral</span></a>
-        <a class="nav-item" href="#markets"><i data-lucide="arrow-left-right"></i><span>Mercados</span><span class="nav-count">12</span></a>
+        <a class="nav-item" href="mercado.html"><i data-lucide="arrow-left-right"></i><span>Mercados</span><span class="nav-count" id="navMarketsCount">—</span></a>
         <a class="nav-item" href="#favorites"><i data-lucide="star"></i><span>Favoritos</span></a>
         <a class="nav-item" href="#alerts"><i data-lucide="bell-ring"></i><span>Alertas</span><span class="alert-dot"></span></a>
         <p class="nav-label nav-label-spaced">Organizar</p>
@@ -58,6 +58,9 @@
 
     <main class="main-content" id="top">
       <header class="dash-topbar">
+        <button class="icon-button sidebar-expand-toggle" id="sidebarExpandToggle" type="button" aria-label="Expandir menu" title="Expandir menu">
+          <i data-lucide="panel-left-open"></i>
+        </button>
         <button class="icon-button menu-toggle" id="menuToggle" aria-label="Abrir menu"><i data-lucide="menu"></i></button>
         <div class="mobile-brand"><span class="logo-slot logo-slot--mobile" data-moedax-logo data-logo-title="MoedaX"></span></div>
 
@@ -75,6 +78,10 @@
               <i data-lucide="chevron-down" aria-hidden="true"></i>
             </button>
             <div class="user-menu" id="userMenu" hidden role="menu">
+              <div class="user-menu-header">
+                <strong id="userMenuName">Usuário</strong>
+                <span id="userMenuEmail">—</span>
+              </div>
               <button type="button" id="logoutBtn" role="menuitem">Sair da conta</button>
             </div>
           </div>
@@ -96,17 +103,17 @@
         <section class="dash-stats" aria-label="Resumo da carteira">
           <article class="dash-stat dash-card">
             <p class="dash-stat-label">Saldo estimado (carteira)</p>
-            <p class="dash-stat-value">R$ 12.458,32</p>
-            <p class="dash-stat-meta"><i data-lucide="trending-up"></i> 2,4% hoje</p>
+            <p class="dash-stat-value" id="statBalance">—</p>
+            <p class="dash-stat-meta" id="statBalanceMeta"><i data-lucide="trending-up"></i> —</p>
           </article>
           <article class="dash-stat dash-card">
             <p class="dash-stat-label">Moedas acompanhadas</p>
-            <p class="dash-stat-value">6</p>
+            <p class="dash-stat-value" id="statTracked">—</p>
             <a class="dash-stat-link" href="#favorites">Ver todas →</a>
           </article>
           <article class="dash-stat dash-card">
             <p class="dash-stat-label">Variação do dia</p>
-            <p class="dash-stat-value positive">+1,32%</p>
+            <p class="dash-stat-value positive" id="statVariation">—</p>
             <div class="dash-stat-chart" aria-hidden="true">
               <svg viewBox="0 0 120 40" preserveAspectRatio="none">
                 <defs>

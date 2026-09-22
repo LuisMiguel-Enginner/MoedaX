@@ -18,15 +18,14 @@ export async function getCurrentUser() {
   if (!session) return null;
 
   let profile = null;
-  try {
-    const { data } = await supabase
-      .from('profiles')
-      .select('full_name, account_type')
-      .eq('id', session.user.id)
-      .maybeSingle();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('full_name, account_type')
+    .eq('id', session.user.id)
+    .maybeSingle();
+
+  if (!error) {
     profile = data;
-  } catch {
-    /* perfil ainda não criado ou RLS */
   }
 
   const meta = session.user.user_metadata || {};

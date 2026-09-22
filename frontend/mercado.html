@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Compare o desempenho de moedas e criptomoedas na MoedaX." />
+  <title>MoedaX | Comprar moedas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/mercado.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script type="module">
+    import { requireAuth } from './javascript/auth-guard.js';
+    import { mountMoedaxLogos } from './javascript/moedax-logo.js';
+    import { initMarketPage } from './javascript/mercado.js';
+    await requireAuth();
+    mountMoedaxLogos();
+    await initMarketPage();
+  </script>
+</head>
+<body class="market-page">
+  <div class="market-shell">
+    <header class="market-header">
+      <a class="market-brand" href="index.html" aria-label="Voltar para a visão geral"><span class="logo-slot logo-slot--market" data-moedax-logo data-logo-title="MoedaX"></span></a>
+      <label class="market-search"><i data-lucide="search"></i><input type="search" placeholder="Buscar moedas (ex: BTC, USD, EUR...)" aria-label="Buscar moedas" /></label>
+      <div class="market-header-actions"><button class="market-icon-button" aria-label="Notificações"><i data-lucide="bell"></i><span></span></button><div class="market-avatar" data-user-initials>MX</div><strong id="marketUserName">Usuário</strong><i data-lucide="chevron-down" class="market-chevron"></i></div>
+    </header>
+
+    <main class="market-content">
+      <section class="market-intro"><div><h1>Comprar Moedas</h1><p>Selecione as moedas e o período para visualizar o desempenho no gráfico.</p></div><div class="intro-decoration"><span></span><span></span><span></span></div></section>
+
+      <section class="market-controls" aria-label="Filtros do comparador">
+        <div class="control-group currency-control"><label>Moedas</label><div class="currency-select" id="currencySelect"><div class="selected-currencies" id="selectedCurrencies"></div><button class="select-chevron" type="button" aria-label="Abrir seleção de moedas"><i data-lucide="chevron-down"></i></button><div class="currency-menu" id="currencyMenu" hidden></div></div></div>
+        <div class="control-group period-control"><label for="periodSelect">Período</label><div class="period-select"><select id="periodSelect"><option value="1h">Última hora</option><option value="24h" selected>Últimas 24 horas</option><option value="3d">Últimos 3 dias</option><option value="15d">Últimos 15 dias</option><option value="30d">Últimos 30 dias</option></select><i data-lucide="calendar-days"></i></div></div>
+      </section>
+
+      <section class="market-grid">
+        <article class="comparison-card"><div class="comparison-header"><div><h2>Desempenho comparativo</h2><p>Variação percentual acumulada · base 0% em 16 set.</p></div><div class="chart-legend" id="chartLegend"></div></div><div class="comparison-chart"><div class="y-axis"><span>+6%</span><span>+4%</span><span>+2%</span><span>0%</span><span>−2%</span></div><div class="chart-canvas"><div class="chart-grid-lines"><span></span><span></span><span></span><span></span><span></span></div><svg id="comparisonChart" viewBox="0 0 760 240" preserveAspectRatio="none" role="img" aria-label="Gráfico de desempenho comparativo"></svg><div class="x-axis"><span>16 set.</span><span>17 set.</span><span>18 set.</span><span>19 set.</span><span>20 set.</span><span>21 set.</span><span>Hoje</span></div></div></div></article>
+        <aside class="summary-card"><div class="summary-header"><div><h2>Resumo atual</h2><p id="summaryTime">Hoje, — · valores em BRL</p></div><i data-lucide="refresh-cw" id="refreshMarket" title="Atualizar cotações"></i></div><div id="summaryList" class="summary-list"></div><p class="summary-note">Variação calculada em relação ao fechamento de 7 dias atrás.</p></aside>
+      </section>
+
+      <section class="market-tip"><div class="tip-icon"><i data-lucide="lightbulb"></i></div><div><strong>Compare antes de decidir</strong><p>Use diferentes períodos para identificar tendências e evitar decisões baseadas em uma única oscilação.</p></div></section>
+    </main>
+  </div>
+</body>
+</html>
