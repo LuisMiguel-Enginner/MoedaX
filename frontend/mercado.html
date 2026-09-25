@@ -7,8 +7,10 @@
   <title>MoedaX | Comprar moedas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/deposito.css" />
   <link rel="stylesheet" href="css/mercado.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script type="module">
@@ -21,27 +23,89 @@
   </script>
 </head>
 <body class="market-page">
-  <div class="market-shell">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <button class="brand brand-toggle" type="button" id="sidebarBrandToggle" aria-label="Recolher ou expandir menu">
+        <span class="logo-slot logo-slot--sidebar" data-moedax-logo data-logo-title="MoedaX"></span>
+      </button>
+
+      <nav class="main-nav" aria-label="Navegação principal">
+        <p class="nav-label">Workspace</p>
+        <a class="nav-item" href="index.html"><i data-lucide="layout-dashboard"></i><span>Visão geral</span></a>
+        <a class="nav-item active" href="mercado.html"><i data-lucide="arrow-left-right"></i><span>Mercados</span></a>
+        <a class="nav-item" href="index.html#favorites"><i data-lucide="star"></i><span>Favoritos</span></a>
+        <a class="nav-item" href="alertas.html"><i data-lucide="bell-ring"></i><span>Alertas</span><span class="alert-dot"></span></a>
+        <p class="nav-label nav-label-spaced">Organizar</p>
+        <a class="nav-item" href="historico.html"><i data-lucide="history"></i><span>Histórico</span></a>
+        <a class="nav-item" href="index.html#settings"><i data-lucide="settings-2"></i><span>Configurações</span></a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="upgrade-card">
+          <div class="upgrade-icon"><i data-lucide="sparkles"></i></div>
+          <strong>Dados sem limites</strong>
+          <p>Desbloqueie análises avançadas.</p>
+          <button class="upgrade-link" type="button">Conhecer plano <i data-lucide="arrow-up-right"></i></button>
+        </div>
+        <div class="profile">
+          <div class="avatar" data-user-initials>MX</div>
+          <div>
+            <strong id="sidebarUserName">Usuário</strong>
+            <span id="sidebarUserRole">Conta pessoal</span>
+          </div>
+          <button class="deposit-button" id="depositButton" type="button"><i data-lucide="plus"></i> Depositar</button>
+          <button class="icon-button small" aria-label="Abrir opções da conta"><i data-lucide="more-horizontal"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="market-shell">
     <header class="market-header">
+      <button class="icon-button sidebar-expand-toggle" id="sidebarExpandToggle" type="button" aria-label="Expandir menu" title="Expandir menu"><i data-lucide="panel-left-open"></i></button>
+      <button class="icon-button menu-toggle" id="menuToggle" type="button" aria-label="Abrir menu"><i data-lucide="menu"></i></button>
       <a class="market-brand" href="index.html" aria-label="Voltar para a visão geral"><span class="logo-slot logo-slot--market" data-moedax-logo data-logo-title="MoedaX"></span></a>
       <label class="market-search"><i data-lucide="search"></i><input type="search" placeholder="Buscar moedas (ex: BTC, USD, EUR...)" aria-label="Buscar moedas" /></label>
-      <div class="market-header-actions"><button class="market-icon-button" aria-label="Notificações"><i data-lucide="bell"></i><span></span></button><div class="market-avatar" data-user-initials>MX</div><strong id="marketUserName">Usuário</strong><i data-lucide="chevron-down" class="market-chevron"></i></div>
+      <div class="market-header-actions"><button class="deposit-button topbar-deposit-button" id="depositButton" data-deposit-trigger type="button"><i data-lucide="plus"></i> Depositar</button><button class="market-icon-button" id="notificationButton" type="button" aria-label="Notificações"><i data-lucide="bell"></i><span></span></button><div class="market-avatar" data-user-initials>MX</div><strong id="marketUserName">Usuário</strong><i data-lucide="chevron-down" class="market-chevron"></i></div>
     </header>
 
-    <main class="market-content">
-      <section class="market-intro"><div><h1>Comprar Moedas</h1><p>Selecione as moedas e o período para visualizar o desempenho no gráfico.</p></div><div class="intro-decoration"><span></span><span></span><span></span></div></section>
-
-      <section class="market-controls" aria-label="Filtros do comparador">
-        <div class="control-group currency-control"><label>Moedas</label><div class="currency-select" id="currencySelect"><div class="selected-currencies" id="selectedCurrencies"></div><button class="select-chevron" type="button" aria-label="Abrir seleção de moedas"><i data-lucide="chevron-down"></i></button><div class="currency-menu" id="currencyMenu" hidden></div></div></div>
-        <div class="control-group period-control"><label for="periodSelect">Período</label><div class="period-select"><select id="periodSelect"><option value="1h">Última hora</option><option value="24h" selected>Últimas 24 horas</option><option value="3d">Últimos 3 dias</option><option value="15d">Últimos 15 dias</option><option value="30d">Últimos 30 dias</option></select><i data-lucide="calendar-days"></i></div></div>
+    <div class="market-content">
+      <section class="market-page-heading">
+        <div>
+          <span class="eyebrow">Operação rápida</span>
+          <h1>Comprar moedas</h1>
+          <p>Escolha um ativo, defina o valor e acompanhe a conversão antes de confirmar.</p>
+        </div>
+        <div class="heading-mark" aria-hidden="true"><span></span><span></span><span></span><i data-lucide="arrow-up-right"></i></div>
       </section>
 
-      <section class="market-grid">
-        <article class="comparison-card"><div class="comparison-header"><div><h2>Desempenho comparativo</h2><p>Variação percentual acumulada · base 0% em 16 set.</p></div><div class="chart-legend" id="chartLegend"></div></div><div class="comparison-chart"><div class="y-axis"><span>+6%</span><span>+4%</span><span>+2%</span><span>0%</span><span>−2%</span></div><div class="chart-canvas"><div class="chart-grid-lines"><span></span><span></span><span></span><span></span><span></span></div><svg id="comparisonChart" viewBox="0 0 760 240" preserveAspectRatio="none" role="img" aria-label="Gráfico de desempenho comparativo"></svg><div class="x-axis"><span>16 set.</span><span>17 set.</span><span>18 set.</span><span>19 set.</span><span>20 set.</span><span>21 set.</span><span>Hoje</span></div></div></div></article>
-        <aside class="summary-card"><div class="summary-header"><div><h2>Resumo atual</h2><p id="summaryTime">Hoje, — · valores em BRL</p></div><i data-lucide="refresh-cw" id="refreshMarket" title="Atualizar cotações"></i></div><div id="summaryList" class="summary-list"></div><p class="summary-note">Variação calculada em relação ao fechamento de 7 dias atrás.</p></aside>
-      </section>
+      <section class="purchase-layout" aria-label="Compra de moedas">
+        <article class="purchase-card">
+          <div class="card-heading"><div><span class="eyebrow">Carteira</span><h2>Nova compra</h2></div><span class="secure-badge"><i data-lucide="shield-check"></i> Protegida</span></div>
+          <div class="asset-tabs" role="tablist" aria-label="Escolha a moeda">
+            <button class="asset-tab active" type="button" role="tab" aria-selected="true" data-asset="BTC"><span class="coin-icon btc">₿</span><span><strong>Bitcoin</strong><small>BTC</small></span></button>
+            <button class="asset-tab" type="button" role="tab" aria-selected="false" data-asset="ETH"><span class="coin-icon eth">◆</span><span><strong>Ethereum</strong><small>ETH</small></span></button>
+            <button class="asset-tab" type="button" role="tab" aria-selected="false" data-asset="USD"><span class="coin-icon usd">$</span><span><strong>Dólar</strong><small>USD</small></span></button>
+          </div>
+          <div class="amount-label"><label for="investmentAmount">Valor a investir</label><span>BRL</span></div>
+          <div class="amount-field"><span>R$</span><input id="investmentAmount" type="number" min="0" step="0.01" value="500" inputmode="decimal" aria-label="Valor a investir em reais" /></div>
+          <div class="quick-values" aria-label="Valores rápidos">
+            <button type="button" data-amount="100">R$ 100</button><button class="selected" type="button" data-amount="500">R$ 500</button><button type="button" data-amount="1000">R$ 1.000</button><button type="button" data-amount="max">Máximo</button>
+          </div>
+          <div class="conversion-preview"><div><span>Você recebe aproximadamente</span><strong id="receiveAmount">0,0008 BTC</strong></div><i data-lucide="arrow-right-left"></i></div>
+          <div class="purchase-summary"><div><span>Cotação atual</span><strong id="currentPrice">R$ 0,00</strong></div><div><span>Taxa cobrada</span><strong id="feeAmount">R$ 0,00</strong></div><div class="summary-total"><span>Total debitado</span><strong id="totalAmount">R$ 0,00</strong></div></div>
+          <button class="confirm-purchase" id="confirmPurchase" type="button">Comprar agora <i data-lucide="arrow-right"></i></button>
+          <p class="purchase-feedback" id="purchaseFeedback" role="status" aria-live="polite"></p>
+        </article>
 
-      <section class="market-tip"><div class="tip-icon"><i data-lucide="lightbulb"></i></div><div><strong>Compare antes de decidir</strong><p>Use diferentes períodos para identificar tendências e evitar decisões baseadas em uma única oscilação.</p></div></section>
+        <div class="market-side-column">
+          <article class="balance-card"><div class="balance-top"><span>Saldo disponível</span><i data-lucide="wallet-cards"></i></div><strong>R$ 0,00</strong><p><i data-lucide="refresh-cw"></i> Atualizado agora, <span id="balanceTime">--:--</span></p></article>
+          <article class="quotes-card"><div class="card-heading compact"><div><span class="eyebrow">Mercado agora</span><h2>Cotações</h2></div><button class="refresh-button" id="refreshMarket" type="button" aria-label="Atualizar cotações"><i data-lucide="refresh-cw"></i></button></div><div id="quotesList" class="quotes-list"></div></article>
+          <article class="insight-card"><div class="insight-icon"><i data-lucide="lightbulb"></i></div><div><strong>Olho no movimento</strong><p>O mercado vem mostrando força nas últimas horas. Compare a variação antes de escolher o melhor momento.</p></div></article>
+        </div>
+      </section>
+    </div>
+      </div>
     </main>
   </div>
 </body>

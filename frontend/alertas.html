@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Gerencie seus alertas de investimentos na MoedaX." />
+  <title>MoedaX | Alertas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/deposito.css" />
+  <link rel="stylesheet" href="css/alertas.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script type="module">
+    import { requireAuth } from './javascript/auth-guard.js';
+    import { mountMoedaxLogos } from './javascript/moedax-logo.js';
+    import { initAlertsPage } from './javascript/alertas.js';
+    await requireAuth();
+    mountMoedaxLogos();
+    await initAlertsPage();
+  </script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <button class="brand brand-toggle" type="button" id="sidebarBrandToggle" aria-label="Recolher ou expandir menu">
+        <span class="logo-slot logo-slot--sidebar" data-moedax-logo data-logo-title="MoedaX"></span>
+      </button>
+      <nav class="main-nav" aria-label="Navegação principal">
+        <p class="nav-label">Workspace</p>
+        <a class="nav-item" href="index.html"><i data-lucide="layout-dashboard"></i><span>Visão geral</span></a>
+        <a class="nav-item" href="mercado.html"><i data-lucide="arrow-left-right"></i><span>Mercados</span></a>
+        <a class="nav-item" href="index.html#favorites"><i data-lucide="star"></i><span>Favoritos</span></a>
+        <a class="nav-item active" href="alertas.html"><i data-lucide="bell-ring"></i><span>Alertas</span><span class="nav-count" id="navAlertsCount">1</span></a>
+        <p class="nav-label nav-label-spaced">Organizar</p>
+        <a class="nav-item" href="historico.html"><i data-lucide="history"></i><span>Histórico</span></a>
+        <a class="nav-item" href="index.html#settings"><i data-lucide="settings-2"></i><span>Configurações</span></a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="upgrade-card">
+          <div class="upgrade-icon"><i data-lucide="sparkles"></i></div>
+          <strong>Dados sem limites</strong>
+          <p>Desbloqueie análises avançadas.</p>
+          <button class="upgrade-link" type="button">Conhecer plano <i data-lucide="arrow-up-right"></i></button>
+        </div>
+        <div class="profile">
+          <div class="avatar" data-user-initials>MX</div>
+          <div><strong id="sidebarUserName">Usuário</strong><span id="sidebarUserRole">Conta pessoal</span></div><button class="deposit-button" id="depositButton" type="button"><i data-lucide="plus"></i> Depositar</button>
+          <button class="icon-button small" aria-label="Abrir opções da conta"><i data-lucide="more-horizontal"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="dash-topbar">
+        <button class="icon-button sidebar-expand-toggle" id="sidebarExpandToggle" type="button" aria-label="Expandir menu" title="Expandir menu"><i data-lucide="panel-left-open"></i></button>
+        <button class="icon-button menu-toggle" id="menuToggle" type="button" aria-label="Abrir menu"><i data-lucide="menu"></i></button>
+        <div class="mobile-brand"><span class="logo-slot logo-slot--mobile" data-moedax-logo data-logo-title="MoedaX"></span></div>
+        <label class="dash-search"><i data-lucide="search" aria-hidden="true"></i><input type="search" placeholder="Buscar moedas (ex: BTC, USD, EUR...)" aria-label="Buscar moedas" /></label>
+        <div class="dash-topbar-actions">
+          <button class="deposit-button topbar-deposit-button" id="depositButton" data-deposit-trigger type="button"><i data-lucide="plus"></i> Depositar</button>
+          <button class="icon-button notification-button" id="notificationButton" type="button" aria-label="Notificações"><i data-lucide="bell"></i><span></span></button>
+          <div class="user-menu-wrap"><button class="user-menu-btn" id="userMenuToggle" type="button" aria-expanded="false" aria-haspopup="true"><span class="dash-avatar" data-user-initials>MX</span><span id="topbarUserName">Usuário</span><i data-lucide="chevron-down"></i></button><div class="user-menu" id="userMenu" hidden role="menu"><div class="user-menu-header"><strong id="userMenuName">Usuário</strong><span id="userMenuEmail">-</span></div><button type="button" id="logoutBtn" role="menuitem">Sair da conta</button></div></div>
+        </div>
+      </header>
+
+      <div class="alert-content">
+        <section class="alert-page-heading">
+          <div><span class="alert-eyebrow">Monitoramento inteligente</span><h1>Alertas</h1><p>Seja avisado quando suas moedas atingirem um valor importante.</p></div>
+          <button class="new-alert-button" id="newAlertButton" type="button"><i data-lucide="plus"></i> Novo alerta</button>
+        </section>
+
+        <div class="alert-filters" role="tablist" aria-label="Filtrar alertas">
+          <button class="active" type="button" data-filter="all" aria-selected="true">Todos <span>4</span></button>
+          <button type="button" data-filter="active" aria-selected="false">Ativos <span>3</span></button>
+          <button type="button" data-filter="triggered" aria-selected="false">Disparados <span>1</span></button>
+        </div>
+
+        <section class="alert-list" id="alertList" aria-label="Lista de alertas"></section>
+
+        <section class="recent-alerts">
+          <div class="recent-heading"><div><span class="alert-eyebrow">Histórico</span><h2>Disparados recentemente</h2></div><span class="recent-count">1 alerta</span></div>
+          <div id="recentAlertList" class="recent-list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

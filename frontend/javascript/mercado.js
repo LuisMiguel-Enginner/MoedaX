@@ -1,22 +1,33 @@
 import { getCurrentUser } from './session-user.js';
+import { addDemoInvestment, formatDemoBRL, getDemoAccount, initDepositControls, initNotificationButton } from './demo-account.js';
 
 const fallbackAssets = [
-  { symbol: 'BTC', name: 'Bitcoin', price: 'R$ 612.340,12', change: '+3,21%', direction: 'up', color: '#f7931a', icon: '₿' },
-  { symbol: 'ETH', name: 'Ethereum', price: 'R$ 23.487,56', change: '+2,15%', direction: 'up', color: '#627eea', icon: '◆' },
-  { symbol: 'USD', name: 'Dólar americano', price: 'R$ 5,32', change: '+0,45%', direction: 'up', color: '#45ad72', icon: '$' },
-  { symbol: 'EUR', name: 'Euro', price: 'R$ 6,14', change: '+0,28%', direction: 'up', color: '#2d91df', icon: '€' },
+  { symbol: 'BTC', name: 'Bitcoin', price: 'R$ 612.340,12', change: '+3,21%', icon: '₿', color: 'btc' },
+  { symbol: 'ETH', name: 'Ethereum', price: 'R$ 23.487,56', change: '+2,15%', icon: '◆', color: 'eth' },
+  { symbol: 'USD', name: 'Dólar americano', price: 'R$ 5,32', change: '+0,45%', icon: '$', color: 'usd' },
+  { symbol: 'EUR', name: 'Euro', price: 'R$ 6,14', change: '-0,28%', icon: '€', color: 'eur' },
 ];
 
 let assets = [];
-let selected = ['BTC', 'ETH', 'USD'];
-let selectedPeriod = '24h';
-let histories = {};
-const colors = { BTC: '#f7931a', ETH: '#4169e1', USD: '#45ad72', EUR: '#2d91df' };
+let selectedSymbol = 'BTC';
+let demoBalance = 0;
+const feeRate = 0.009;
 
-function coinIcon(asset) {
-  const color = colors[asset.symbol] || asset.color;
-  if (asset.symbol === 'ETH') return `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="${color}"/><path d="M16 5 10 16l6 3.5 6-3.5L16 5Z" fill="#fff"/><path d="m16 21-6-3 6 9 6-9-6 3Z" fill="#d7ddff"/></svg>`;
-  return `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="${color}"/><text x="16" y="22" text-anchor="middle" fill="#fff" font-size="17" font-family="Arial" font-weight="700">${asset.icon}</text></svg>`;
+function parseBRL(value) {
+  const normalized = String(value).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
+  return Number(normalized) || 0;
+}
+
+function formatBRL(value) {
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function formatAmount(value) {
+  return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 8 });
+}
+
+function assetIcon(asset) {
+  return `<span class="coin-icon ${asset.color}">${asset.icon}</span>`;
 }
 
 async function loadAssets() {
@@ -25,109 +36,139 @@ async function loadAssets() {
       const response = await fetch(url);
       const data = await response.json();
       if (data.assets?.length) return data.assets;
-    } catch { /* fallback */ }
+    } catch { /* usa os valores locais quando a API estiver indisponível */ }
   }
   return fallbackAssets;
 }
 
-async function loadHistories() {
-  const results = await Promise.all(selected.map(async (symbol) => {
-    for (const url of [`/api/history?symbol=${symbol}&period=${selectedPeriod}`, `http://localhost:3000/api/history?symbol=${symbol}&period=${selectedPeriod}`]) {
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.history?.length) return [symbol, data.history];
-      } catch { /* tenta a próxima fonte */ }
+function getAsset(symbol) {
+  return assets.find((asset) => asset.symbol === symbol) || fallbackAssets.find((asset) => asset.symbol === symbol);
+}
+
+function renderQuotes() {
+  const list = document.querySelector('#quotesList');
+  const quoteAssets = assets.filter((asset) => ['BTC', 'ETH', 'USD'].includes(asset.symbol));
+  list.innerHTML = quoteAssets.map((asset) => {
+    const change = String(asset.change || '0%');
+    return `<div class="quote-row">${assetIcon(asset)}<div class="quote-info"><strong>${asset.name}</strong><small>${asset.symbol}</small></div><div class="quote-value"><strong>${asset.price}</strong><span class="quote-change ${change.startsWith('-') ? 'down' : ''}">${change}</span></div></div>`;
+  }).join('');
+}
+
+function updatePurchase() {
+  const asset = getAsset(selectedSymbol);
+  const amountInput = document.querySelector('#investmentAmount');
+  const amount = Math.max(0, Number(amountInput.value) || 0);
+  const price = parseBRL(asset.price);
+  const fee = amount * feeRate;
+  const received = price ? amount / price : 0;
+
+  document.querySelector('#receiveAmount').textContent = `${formatAmount(received)} ${asset.symbol}`;
+  document.querySelector('#currentPrice').textContent = formatBRL(price);
+  document.querySelector('#feeAmount').textContent = formatBRL(fee);
+  document.querySelector('#totalAmount').textContent = formatBRL(amount + fee);
+}
+
+function bindPurchaseForm(userId, updateBalance) {
+  const amountInput = document.querySelector('#investmentAmount');
+  document.querySelectorAll('.asset-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      selectedSymbol = tab.dataset.asset;
+      document.querySelectorAll('.asset-tab').forEach((item) => {
+        const active = item === tab;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-selected', String(active));
+      });
+      updatePurchase();
+    });
+  });
+
+  amountInput.addEventListener('input', () => {
+    document.querySelectorAll('.quick-values button').forEach((button) => button.classList.remove('selected'));
+    updatePurchase();
+  });
+
+  document.querySelectorAll('.quick-values button').forEach((button) => {
+    button.addEventListener('click', () => {
+      amountInput.value = button.dataset.amount === 'max' ? String(demoBalance) : button.dataset.amount;
+      document.querySelectorAll('.quick-values button').forEach((item) => item.classList.toggle('selected', item === button));
+      updatePurchase();
+    });
+  });
+
+  document.querySelector('#confirmPurchase').addEventListener('click', () => {
+    const asset = getAsset(selectedSymbol);
+    const amount = Math.max(0, Number(amountInput.value) || 0);
+    const price = parseBRL(asset.price);
+    const fee = amount * feeRate;
+    if (!amount || !price) return;
+    const result = addDemoInvestment(userId, {
+      symbol: asset.symbol,
+      name: asset.name,
+      amount,
+      fee,
+      price,
+      quantity: amount / price,
+    });
+    const feedback = document.querySelector('#purchaseFeedback');
+    if (result.error) {
+      feedback.className = 'purchase-feedback error';
+      feedback.textContent = result.error;
+      return;
     }
-    const asset = assets.find((item) => item.symbol === symbol) || fallbackAssets.find((item) => item.symbol === symbol);
-    const current = Number(String(asset.price).replace(/[^\d,]/g, '').replace(',', '.')) || 1;
-    const change = Number(String(asset.change).replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
-    const points = selectedPeriod === '1h' ? 12 : selectedPeriod === '24h' ? 24 : selectedPeriod === '3d' ? 36 : selectedPeriod === '15d' ? 45 : 60;
-    return [symbol, Array.from({ length: points }, (_, index) => ({
-      timestamp: Date.now() - (points - index) * 3600000,
-      price: current / (1 + (change / 100) * (1 - index / (points - 1))),
-    }))];
-  }));
-  histories = Object.fromEntries(results);
+    demoBalance = result.account.balance;
+    updateBalance(result.account);
+    feedback.className = 'purchase-feedback';
+    feedback.textContent = `Compra de ${asset.symbol} realizada. Saldo atualizado.`;
+    amountInput.value = '0';
+    document.querySelectorAll('.quick-values button').forEach((button) => button.classList.remove('selected'));
+    updatePurchase();
+  });
 }
 
-function renderCurrencySelector() {
-  const selectedEl = document.querySelector('#selectedCurrencies');
-  const menu = document.querySelector('#currencyMenu');
-  selectedEl.innerHTML = selected.map((symbol) => {
-    const asset = assets.find((item) => item.symbol === symbol);
-    return `<span class="currency-chip">${coinIcon(asset)} ${symbol}<button type="button" data-remove="${symbol}" aria-label="Remover ${symbol}"><i data-lucide="x"></i></button></span>`;
-  }).join('');
-  menu.innerHTML = assets.map((asset) => `<button type="button" class="currency-option ${selected.includes(asset.symbol) ? 'selected' : ''}" data-symbol="${asset.symbol}">${coinIcon(asset)} ${asset.name}</button>`).join('');
-  window.lucide?.createIcons({ nodes: [selectedEl, menu] });
+function bindSidebar() {
+  const shell = document.querySelector('.app-shell');
+  const sidebar = document.querySelector('#sidebar');
+  const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
+  shell?.classList.remove('sidebar-collapsed');
+  document.querySelector('#sidebarBrandToggle')?.addEventListener('click', () => {
+    if (isMobile()) sidebar?.classList.toggle('open');
+    else shell?.classList.toggle('sidebar-collapsed');
+  });
+  document.querySelector('#sidebarExpandToggle')?.addEventListener('click', () => shell?.classList.remove('sidebar-collapsed'));
+  document.querySelector('#menuToggle')?.addEventListener('click', () => sidebar?.classList.toggle('open'));
+  document.querySelectorAll('.nav-item').forEach((item) => item.addEventListener('click', () => sidebar?.classList.remove('open')));
 }
 
-function renderLegend() {
-  document.querySelector('#chartLegend').innerHTML = selected.map((symbol) => `<span class="legend-item"><span style="background:${colors[symbol]}"></span>${symbol}</span>`).join('');
+async function refreshMarket() {
+  assets = await loadAssets();
+  renderQuotes();
+  updatePurchase();
+  document.querySelector('#balanceTime').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  window.lucide?.createIcons();
 }
-
-function renderChart() {
-  const chart = document.querySelector('#comparisonChart');
-  const variationPoints = (symbol) => {
-    const points = histories[symbol] || [];
-    const initial = points[0]?.price || 1;
-    return points.map((point) => ((point.price / initial) - 1) * 100);
-  };
-  const allValues = selected.flatMap((symbol) => variationPoints(symbol));
-  if (!allValues.length) return;
-  const min = Math.min(...allValues);
-  const max = Math.max(...allValues);
-  const range = max - min || 1;
-  const pathFor = (symbol) => {
-    const points = variationPoints(symbol);
-    return points.map((point, index) => {
-      const x = (index / Math.max(points.length - 1, 1)) * 760;
-      const y = 215 - ((point - min) / range) * 190;
-      return `${index ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
-  };
-  chart.innerHTML = selected.map((symbol) => `<path class="chart-line" d="${pathFor(symbol)}" stroke="${colors[symbol]}"/>`).join('');
-}
-
-function periodChange(symbol) {
-  const points = histories[symbol] || [];
-  if (points.length < 2 || !points[0].price) {
-    return assets.find((asset) => asset.symbol === symbol)?.change || '+0,00%';
-  }
-  const change = ((points[points.length - 1].price / points[0].price) - 1) * 100;
-  return `${change >= 0 ? '+' : ''}${change.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
-}
-
-function renderSummary() {
-  document.querySelector('#summaryList').innerHTML = assets.filter((asset) => selected.includes(asset.symbol)).map((asset) => {
-    const change = periodChange(asset.symbol);
-    return `<div class="summary-asset"><div class="summary-asset-top"><span class="summary-icon">${coinIcon(asset)}</span><strong class="summary-asset-name">${asset.name}<span class="summary-asset-symbol">${asset.symbol}</span></strong><span class="summary-bar" style="background:${colors[asset.symbol]}"></span></div><div class="summary-price"><span>${asset.price}</span><span class="summary-change ${change.startsWith('-') ? 'down' : ''}">${change}</span></div></div>`;
-  }).join('');
-}
-
-function render() { renderCurrencySelector(); renderLegend(); renderChart(); renderSummary(); }
 
 export async function initMarketPage() {
   const user = await getCurrentUser();
   if (!user) return;
   document.querySelector('#marketUserName').textContent = user.firstName;
-  document.querySelector('[data-user-initials]').textContent = user.initials;
-  document.querySelector('#summaryTime').textContent = `Hoje, ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · valores em BRL`;
-  assets = await loadAssets();
-  selected = selected.filter((symbol) => assets.some((asset) => asset.symbol === symbol));
-  await loadHistories();
-  render();
-  document.querySelector('#currencySelect').addEventListener('click', async (event) => {
-    const symbol = event.target.closest('[data-symbol]')?.dataset.symbol;
-    const remove = event.target.closest('[data-remove]')?.dataset.remove;
-    if (symbol) selected = selected.includes(symbol) ? selected.filter((item) => item !== symbol) : [...selected, symbol];
-    if (remove) selected = selected.filter((item) => item !== remove);
-    await loadHistories();
-    render();
+  document.querySelector('#sidebarUserName').textContent = user.fullName;
+  document.querySelector('#sidebarUserRole').textContent = user.accountLabel;
+  document.querySelectorAll('[data-user-initials]').forEach((element) => { element.textContent = user.initials; });
+  const updateBalance = (account) => {
+    const balance = document.querySelector('.balance-card > strong');
+    if (balance) balance.textContent = formatDemoBRL(account.balance);
+  };
+  demoBalance = getDemoAccount(user.id).balance;
+  updateBalance({ balance: demoBalance });
+  initDepositControls(user.id, (account) => {
+    demoBalance = account.balance;
+    updateBalance(account);
   });
-  document.querySelector('.select-chevron').addEventListener('click', () => { const menu = document.querySelector('#currencyMenu'); menu.hidden = !menu.hidden; });
-  document.querySelector('#refreshMarket').addEventListener('click', async () => { assets = await loadAssets(); await loadHistories(); render(); });
-  document.querySelector('#periodSelect').addEventListener('change', async (event) => { selectedPeriod = event.target.value; await loadHistories(); render(); });
-  setInterval(async () => { assets = await loadAssets(); await loadHistories(); render(); }, 60_000);
+  initNotificationButton();
+  await refreshMarket();
+  bindPurchaseForm(user.id, updateBalance);
+  document.querySelector('#refreshMarket').addEventListener('click', refreshMarket);
+  bindSidebar();
   window.lucide?.createIcons();
+  setInterval(refreshMarket, 60_000);
 }

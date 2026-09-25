@@ -303,6 +303,142 @@
   stroke: none;
 }
 
+.investment-tracking {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr);
+  gap: 18px;
+  margin-bottom: 30px;
+  font-family: 'Inter', sans-serif;
+}
+
+.tracking-chart-card,
+.composition-card {
+  min-width: 0;
+  padding: 24px;
+  background: var(--white);
+  border-radius: 22px;
+  box-shadow: 0 8px 20px rgba(27, 58, 107, .04);
+}
+
+.tracking-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tracking-card-header h2 {
+  margin: 0;
+  color: #16233e;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.tracking-card-header p {
+  margin: 5px 0 0;
+  color: #5b6b85;
+  font-size: 11px;
+}
+
+.period-switcher {
+  display: flex;
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: 9px;
+  background: #f1f3f6;
+}
+
+.period-switcher button {
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: transparent;
+  color: #7e899b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.period-switcher button.active {
+  background: #16233e;
+  color: #fff;
+}
+
+.tracking-chart-wrap {
+  height: 220px;
+  margin-top: 22px;
+}
+
+#portfolioChart {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.portfolio-area { fill: url(#portfolioFill); }
+.portfolio-line { fill: none; stroke: #1ac0a3; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.portfolio-point { fill: #0e7c5a; stroke: #fff; stroke-width: 3; }
+
+.portfolio-composition {
+  margin-top: 25px;
+}
+
+.composition-row {
+  display: grid;
+  grid-template-columns: 9px minmax(75px, .7fr) minmax(60px, 1fr) 35px;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 0;
+  border-bottom: 1px solid #eef1f3;
+}
+
+.composition-row:last-child { border-bottom: 0; }
+.composition-dot { width: 8px; height: 8px; border-radius: 50%; }
+.composition-dot.btc, .composition-dot.BTC { background: #f49843; }
+.composition-dot.eth, .composition-dot.ETH { background: #6f7ad6; }
+.composition-dot.usd, .composition-dot.USD { background: #54ae81; }
+.composition-dot.eur, .composition-dot.EUR { background: #6481cf; }
+.composition-name { overflow: hidden; color: #16233e; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.composition-bar { height: 6px; overflow: hidden; border-radius: 999px; background: #edf0f3; }
+.composition-bar span { display: block; height: 100%; border-radius: inherit; background: #1ac0a3; }
+.composition-row:nth-child(1) .composition-bar span { background: #f49843; }
+.composition-row:nth-child(2) .composition-bar span { background: #6f7ad6; }
+.composition-row:nth-child(3) .composition-bar span { background: #54ae81; }
+.composition-row:nth-child(4) .composition-bar span { background: #6481cf; }
+.composition-row strong { color: #16233e; font-size: 11px; text-align: right; }
+
+.yield-summary-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.yield-summary-card {
+  width: min(100%, 440px);
+  padding: 24px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 20px rgba(27, 58, 107, .04);
+  font-family: 'Inter', sans-serif;
+}
+
+.yield-summary-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.yield-summary-header h2 { margin: 0; color: #16233e; font-family: 'Baloo 2', sans-serif; font-size: 1.35rem; line-height: 1.05; }
+.yield-summary-header p { margin: 5px 0 0; color: #5b6b85; font-size: 10px; line-height: 1.4; }
+.yield-period-switcher { display: flex; flex-shrink: 0; padding: 3px; border-radius: 999px; background: #f1f3f6; }
+.yield-period-switcher button { padding: 6px 8px; border-radius: 999px; background: transparent; color: #7e899b; font-size: 9px; font-weight: 700; }
+.yield-period-switcher button.active { background: #16233e; color: #fff; }
+
+.yield-asset-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 21px; }
+.yield-asset-tab { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; padding: 8px 4px; border: 1px solid #edf0f3; border-radius: 10px; background: #fff; color: #5b6b85; font-size: 10px; }
+.yield-asset-tab.active { border-color: var(--yield-active-color, #f7931a); color: #16233e; background: #fbfcfd; }
+.yield-asset-tab strong { font-size: 10px; }.yield-coin { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; color: #fff; font-size: 11px; font-weight: 700; }.yield-coin.btc { background: #f7931a; }.yield-coin.eth { background: #627eea; }.yield-coin.usd { background: #45ad72; }.yield-coin.eur { background: #2d91df; }
+
+.yield-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 22px; }
+.yield-metrics > div { min-width: 0; }.yield-metrics span, .yield-metrics small { display: block; color: #7b8799; font-size: 9px; }.yield-metrics strong { display: block; margin-top: 5px; overflow: hidden; color: #16233e; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }.yield-metrics > div:last-child strong, .yield-metrics small.positive { color: #0e7c5a; }.yield-metrics small.negative { color: #d56f65; }.yield-metrics small { display: flex; align-items: center; gap: 3px; margin-top: 3px; font-weight: 700; }.yield-metrics small svg { width: 11px; }
+
+.yield-chart-wrap { height: 132px; margin-top: 17px; }.yield-chart-wrap svg { width: 100%; height: 100%; overflow: visible; }.yield-area { fill: url(#yieldChartFill); }.yield-line { fill: none; stroke: var(--yield-active-color, #f7931a); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }.yield-point { fill: var(--yield-active-color, #f7931a); stroke: #fff; stroke-width: 3; }
+.yield-performance { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 13px; }.yield-period-chip { min-width: 0; padding: 8px 3px; border-radius: 9px; text-align: center; }.yield-period-chip.positive { background: #eaf8f2; color: #0e7c5a; }.yield-period-chip.negative { background: #fff0ed; color: #c96f64; }.yield-period-chip strong, .yield-period-chip span, .yield-period-chip small { display: block; }.yield-period-chip strong { font-size: 8px; letter-spacing: .3px; }.yield-period-chip span { margin-top: 3px; font-size: 9px; font-weight: 700; }.yield-period-chip small { margin-top: 2px; font-size: 8px; }
+
 .dash-section-title {
   margin: 0 0 16px;
   color: var(--navy);
@@ -460,9 +596,17 @@
   display: none;
 }
 
+.topbar-deposit-button {
+  flex-shrink: 0;
+}
+
 @media (max-width: 1100px) {
   .fav-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .investment-tracking {
+    grid-template-columns: 1fr;
   }
 }
 

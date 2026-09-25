@@ -1,4 +1,5 @@
 import { getCurrentUser, signOut } from './session-user.js';
+import { formatDemoBRL, getDemoAccount, initDepositControls, initNotificationButton } from './demo-account.js';
 
 const DEFAULT_PORTFOLIO = {};
 const DEFAULT_FAVORITE_SYMBOLS = ['BTC', 'ETH', 'USD', 'EUR'];
@@ -64,17 +65,8 @@ function coinIcon(asset) {
 }
 
 function getPortfolio(userId) {
-  const key = `moedax_portfolio_${userId}`;
-  const stored = localStorage.getItem(key);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch {
-      /* fallback */
-    }
-  }
-  localStorage.setItem(key, JSON.stringify(DEFAULT_PORTFOLIO));
-  return { ...DEFAULT_PORTFOLIO };
+  const demoHoldings = getDemoAccount(userId).holdings;
+  return demoHoldings;
 }
 
 function getUserFavoriteSymbols(userId, assets) {
@@ -243,6 +235,149 @@ function renderFavorites(list = userFavorites) {
   window.lucide?.createIcons({ nodes: [grid] });
 }
 
+function renderPortfolioTracking(assets, portfolio) {
+  const composition = document.querySelector('#portfolioComposition');
+  const chart = document.querySelector('#portfolioChart');
+  if (!composition || !chart) return;
+
+  const positions = assets.map((asset) => ({
+    ...asset,
+    value: parseBRLPrice(asset.price) * (portfolio[asset.symbol] || 0),
+  }));
+  const invested = positions.reduce((total, asset) => total + asset.value, 0);
+  const base = invested || 1;
+
+  composition.innerHTML = positions.map((asset) => {
+    const percentage = asset.value / base * 100;
+    return `<div class="composition-row"><span class="composition-dot ${asset.color}"></span><span class="composition-name">${asset.name}</span><div class="composition-bar"><span style="width:${percentage.toFixed(1)}%"></span></div><strong>${percentage.toFixed(0)}%</strong></div>`;
+  }).join('');
+
+  const periods = { '7D': 7, '30D': 30, '1A': 52 };
+  const points = periods[chart.dataset.period || '7D'];
+  const values = Array.from({ length: points }, (_, index) => {
+    const progress = index / Math.max(points - 1, 1);
+    const wave = Math.sin(index * 0.58) * 0.012 + Math.cos(index * 0.19) * 0.006;
+    return base * (0.91 + progress * 0.09 + wave);
+  });
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const path = values.map((value, index) => {
+    const x = (index / Math.max(values.length - 1, 1)) * 720;
+    const y = 192 - ((value - min) / range) * 140;
+    return `${index ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const lastY = 192 - ((values.at(-1) - min) / range) * 140;
+  document.querySelector('#portfolioLine').setAttribute('d', path);
+  document.querySelector('#portfolioArea').setAttribute('d', `${path} L720,215 L0,215 Z`);
+  document.querySelector('#portfolioPoint').setAttribute('cx', '720');
+  document.querySelector('#portfolioPoint').setAttribute('cy', lastY.toFixed(1));
+}
+
+function bindPortfolioPeriods(assets, portfolio) {
+  document.querySelectorAll('.period-switcher button').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('.period-switcher button').forEach((item) => {
+        const active = item === button;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+      const chart = document.querySelector('#portfolioChart');
+      chart.dataset.period = button.dataset.period;
+      renderPortfolioTracking(assets, portfolio);
+    });
+  });
+}
+
+const yieldPeriods = ['1H', '24H', '7D', '30D', '1A'];
+function buildYieldData(assets, account) {
+  return Object.fromEntries(['BTC', 'ETH', 'USD', 'EUR'].map((symbol) => {
+    const asset = assets.find((item) => item.symbol === symbol) || FALLBACK_MARKET_ASSETS.find((item) => item.symbol === symbol);
+    const investments = account.investments.filter((item) => item.symbol === symbol);
+    const invested = investments.reduce((total, item) => total + item.amount, 0);
+    const quantity = account.holdings[symbol] || investments.reduce((total, item) => total + item.quantity, 0);
+    const current = quantity * parseBRLPrice(asset.price);
+    const returnPercent = invested ? ((current / invested) - 1) * 100 : 0;
+    const dailyChange = parseChangePercent(asset.change);
+    return [symbol, {
+      name: asset.name,
+      color: { BTC: '#f7931a', ETH: '#627eea', USD: '#45ad72', EUR: '#2d91df' }[symbol],
+      invested,
+      current,
+      changes: { '1H': dailyChange / 24, '24H': dailyChange, '7D': returnPercent, '30D': returnPercent * 1.5, '1A': returnPercent * 4 },
+    }];
+  }));
+}
+
+function renderYieldSummary(yieldData, symbol = 'BTC', period = '7D') {
+  const data = yieldData[symbol];
+  const change = data.changes[period];
+  const current = data.current;
+  const profit = current - data.invested;
+  const positive = change >= 0;
+  const pointsByPeriod = { '7D': 14, '30D': 30, '1A': 52 };
+  const points = pointsByPeriod[period] || 14;
+  const values = Array.from({ length: points }, (_, index) => {
+    const progress = index / Math.max(points - 1, 1);
+    const wave = Math.sin(index * 0.72 + symbol.length) * 0.014 + Math.cos(index * 0.21) * 0.008;
+    return data.invested * (1 + (change / 100) * progress + wave * (1 - progress * .25));
+  });
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const path = values.map((value, index) => {
+    const x = (index / Math.max(values.length - 1, 1)) * 620;
+    const y = 142 - ((value - min) / range) * 100;
+    return `${index ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const lastY = 142 - ((values.at(-1) - min) / range) * 100;
+
+  document.querySelector('#yieldSummarySubtitle').textContent = `Desempenho do seu investimento em ${data.name}`;
+  document.querySelector('#yieldInvested').textContent = formatBRL(data.invested);
+  document.querySelector('#yieldCurrent').textContent = formatBRL(current);
+  document.querySelector('#yieldProfit').textContent = `${positive ? '+' : '-'}${formatBRL(Math.abs(profit))}`;
+  document.querySelector('#yieldProfitPercent').className = positive ? 'positive' : 'negative';
+  document.querySelector('#yieldProfitPercent').innerHTML = `<i data-lucide="trending-${positive ? 'up' : 'down'}"></i> ${formatPercent(change)}`;
+  document.querySelector('#yieldLine').setAttribute('d', path);
+  document.querySelector('#yieldArea').setAttribute('d', `${path} L620,160 L0,160 Z`);
+  document.querySelector('#yieldPoint').setAttribute('cx', '620');
+  document.querySelector('#yieldPoint').setAttribute('cy', lastY.toFixed(1));
+  document.querySelector('#yieldGradientStart').setAttribute('stop-color', data.color);
+  document.querySelector('#yieldGradientEnd').setAttribute('stop-color', data.color);
+  document.documentElement.style.setProperty('--yield-active-color', data.color);
+  document.querySelector('#yieldPerformance').innerHTML = yieldPeriods.map((item) => {
+    const itemChange = data.changes[item];
+    const itemValue = data.invested * (itemChange / 100);
+    return `<div class="yield-period-chip ${itemChange >= 0 ? 'positive' : 'negative'}"><strong>${item}</strong><span>${formatPercent(itemChange)}</span><small>${itemValue >= 0 ? '+' : '-'}${formatBRL(Math.abs(itemValue))}</small></div>`;
+  }).join('');
+  window.lucide?.createIcons();
+}
+
+function bindYieldSummary(assets, account) {
+  let selectedAsset = 'BTC';
+  let selectedPeriod = '7D';
+  const yieldData = buildYieldData(assets, account);
+  document.querySelectorAll('.yield-asset-tab').forEach((tab) => tab.addEventListener('click', () => {
+    selectedAsset = tab.dataset.yieldAsset;
+    document.querySelectorAll('.yield-asset-tab').forEach((item) => {
+      const active = item === tab;
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-selected', String(active));
+    });
+    renderYieldSummary(yieldData, selectedAsset, selectedPeriod);
+  }));
+  document.querySelectorAll('.yield-period-switcher button').forEach((button) => button.addEventListener('click', () => {
+    selectedPeriod = button.dataset.yieldPeriod;
+    document.querySelectorAll('.yield-period-switcher button').forEach((item) => {
+      const active = item === button;
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-pressed', String(active));
+    });
+    renderYieldSummary(yieldData, selectedAsset, selectedPeriod);
+  }));
+  renderYieldSummary(yieldData, selectedAsset, selectedPeriod);
+}
+
 function bindSearch() {
   const input = document.querySelector('#dashSearch');
   if (!input) return;
@@ -329,8 +464,20 @@ export async function initDashboard() {
   const favoriteSymbols = getUserFavoriteSymbols(user.id, marketAssets);
   userFavorites = marketAssets.filter((asset) => favoriteSymbols.includes(asset.symbol));
   const portfolio = getPortfolio(user.id);
+  const demoAccount = getDemoAccount(user.id);
 
   updateStats(marketAssets, userFavorites, portfolio);
+  const updateDemoBalance = (account) => {
+    const balanceEl = document.querySelector('#statBalance');
+    if (balanceEl) balanceEl.textContent = formatDemoBRL(account.balance);
+  };
+  updateDemoBalance(demoAccount);
+  initDepositControls(user.id, updateDemoBalance);
+  initNotificationButton();
+  const trackingAssets = marketAssets.filter((asset) => ['BTC', 'ETH', 'USD', 'EUR'].includes(asset.symbol));
+  renderPortfolioTracking(trackingAssets, portfolio);
+  bindPortfolioPeriods(trackingAssets, portfolio);
+  bindYieldSummary(marketAssets, getDemoAccount(user.id));
   renderFavorites();
   bindSearch();
   bindUserMenu();

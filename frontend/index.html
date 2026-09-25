@@ -7,9 +7,10 @@
   <title>MoedaX | Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/deposito.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script type="module">
     import { requireAuth } from './javascript/auth-guard.js';
@@ -32,9 +33,9 @@
         <a class="nav-item active" href="#overview"><i data-lucide="layout-dashboard"></i><span>Visão geral</span></a>
         <a class="nav-item" href="mercado.html"><i data-lucide="arrow-left-right"></i><span>Mercados</span><span class="nav-count" id="navMarketsCount">—</span></a>
         <a class="nav-item" href="#favorites"><i data-lucide="star"></i><span>Favoritos</span></a>
-        <a class="nav-item" href="#alerts"><i data-lucide="bell-ring"></i><span>Alertas</span><span class="alert-dot"></span></a>
+        <a class="nav-item" href="alertas.html"><i data-lucide="bell-ring"></i><span>Alertas</span><span class="alert-dot"></span></a>
         <p class="nav-label nav-label-spaced">Organizar</p>
-        <a class="nav-item" href="#history"><i data-lucide="history"></i><span>Histórico</span></a>
+        <a class="nav-item" href="historico.html"><i data-lucide="history"></i><span>Histórico</span></a>
         <a class="nav-item" href="#settings"><i data-lucide="settings-2"></i><span>Configurações</span></a>
       </nav>
 
@@ -51,6 +52,7 @@
             <strong id="sidebarUserName">Usuário</strong>
             <span id="sidebarUserRole">Conta pessoal</span>
           </div>
+          <button class="deposit-button" id="depositButton" type="button"><i data-lucide="plus"></i> Depositar</button>
           <button class="icon-button small" aria-label="Abrir opções da conta"><i data-lucide="more-horizontal"></i></button>
         </div>
       </div>
@@ -70,7 +72,8 @@
         </label>
 
         <div class="dash-topbar-actions">
-          <button class="icon-button notification-button" aria-label="Notificações"><i data-lucide="bell"></i><span></span></button>
+          <button class="deposit-button topbar-deposit-button" id="depositButton" data-deposit-trigger type="button"><i data-lucide="plus"></i> Depositar</button>
+          <button class="icon-button notification-button" id="notificationButton" type="button" aria-label="Notificações"><i data-lucide="bell"></i><span></span></button>
           <div class="user-menu-wrap">
             <button class="user-menu-btn" id="userMenuToggle" type="button" aria-expanded="false" aria-haspopup="true">
               <span class="dash-avatar" data-user-initials>MX</span>
@@ -126,6 +129,85 @@
                 <path d="M0,32 C20,28 35,18 55,22 S85,8 120,6" />
               </svg>
             </div>
+          </article>
+        </section>
+
+        <section class="investment-tracking" aria-labelledby="trackingTitle">
+          <article class="tracking-chart-card">
+            <div class="tracking-card-header">
+              <div>
+                <h2 id="trackingTitle">Evolução do patrimônio</h2>
+                <p>Saldo total da carteira ao longo do tempo</p>
+              </div>
+              <div class="period-switcher" role="group" aria-label="Período do gráfico">
+                <button type="button" class="active" data-period="7D" aria-pressed="true">7D</button>
+                <button type="button" data-period="30D" aria-pressed="false">30D</button>
+                <button type="button" data-period="1A" aria-pressed="false">1A</button>
+              </div>
+            </div>
+            <div class="tracking-chart-wrap">
+              <svg id="portfolioChart" viewBox="0 0 720 230" preserveAspectRatio="none" role="img" aria-label="Evolução do patrimônio da carteira">
+                <defs>
+                  <linearGradient id="portfolioFill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#1ac0a3" stop-opacity=".28" />
+                    <stop offset="100%" stop-color="#1ac0a3" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                <path id="portfolioArea" class="portfolio-area" d="" />
+                <path id="portfolioLine" class="portfolio-line" d="" />
+                <circle id="portfolioPoint" class="portfolio-point" cx="0" cy="0" r="5" />
+              </svg>
+            </div>
+          </article>
+
+          <article class="composition-card">
+            <div class="tracking-card-header">
+              <div>
+                <h2>Composição da carteira</h2>
+                <p>% do saldo por moeda</p>
+              </div>
+            </div>
+            <div id="portfolioComposition" class="portfolio-composition"></div>
+          </article>
+        </section>
+
+        <section class="yield-summary-section" aria-labelledby="yieldSummaryTitle">
+          <article class="yield-summary-card">
+            <header class="yield-summary-header">
+              <div>
+                <h2 id="yieldSummaryTitle">Resumo de rendimento</h2>
+                <p id="yieldSummarySubtitle">Desempenho do seu investimento em Bitcoin</p>
+              </div>
+              <div class="yield-period-switcher" role="group" aria-label="Intervalo do rendimento">
+                <button type="button" class="active" data-yield-period="7D" aria-pressed="true">7D</button>
+                <button type="button" data-yield-period="30D" aria-pressed="false">30D</button>
+                <button type="button" data-yield-period="1A" aria-pressed="false">1A</button>
+              </div>
+            </header>
+
+            <div class="yield-asset-tabs" role="tablist" aria-label="Moeda do rendimento">
+              <button class="yield-asset-tab active" type="button" role="tab" aria-selected="true" data-yield-asset="BTC"><span class="yield-coin btc">B</span><strong>BTC</strong></button>
+              <button class="yield-asset-tab" type="button" role="tab" aria-selected="false" data-yield-asset="ETH"><span class="yield-coin eth">E</span><strong>ETH</strong></button>
+              <button class="yield-asset-tab" type="button" role="tab" aria-selected="false" data-yield-asset="USD"><span class="yield-coin usd">$</span><strong>USD</strong></button>
+              <button class="yield-asset-tab" type="button" role="tab" aria-selected="false" data-yield-asset="EUR"><span class="yield-coin eur">€</span><strong>EUR</strong></button>
+            </div>
+
+            <div class="yield-metrics">
+              <div><span>Valor investido</span><strong id="yieldInvested">R$ 0,00</strong></div>
+              <div><span>Valor atual</span><strong id="yieldCurrent">R$ 0,00</strong></div>
+              <div><span>Lucro total</span><strong id="yieldProfit">+R$ 0,00</strong><small id="yieldProfitPercent"><i data-lucide="trending-up"></i> +0,00%</small></div>
+            </div>
+
+            <div class="yield-chart-wrap">
+              <svg id="yieldChart" viewBox="0 0 620 170" preserveAspectRatio="none" role="img" aria-label="Evolução do rendimento da moeda selecionada">
+                <defs><linearGradient id="yieldChartFill" x1="0" x2="0" y1="0" y2="1"><stop id="yieldGradientStart" offset="0%" stop-color="#f7931a" stop-opacity=".28" /><stop id="yieldGradientEnd" offset="100%" stop-color="#f7931a" stop-opacity="0" /></linearGradient></defs>
+                <path id="yieldArea" class="yield-area" d="" />
+                <path id="yieldLine" class="yield-line" d="" />
+                <circle id="yieldPoint" class="yield-point" cx="0" cy="0" r="5" />
+              </svg>
+            </div>
+
+            <div class="yield-performance" id="yieldPerformance" aria-label="Desempenho por período"></div>
           </article>
         </section>
 
