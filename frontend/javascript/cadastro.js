@@ -25,6 +25,23 @@ function getAccountType() {
   return selected?.value || 'investidor';
 }
 
+function getPasswordRequirements(password) {
+  return {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    number: /\d/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
+  };
+}
+
+function updatePasswordRequirements(password) {
+  const requirements = getPasswordRequirements(password);
+  Object.entries(requirements).forEach(([name, valid]) => {
+    document.querySelector(`[data-requirement="${name}"]`)?.classList.toggle('valid', valid);
+  });
+  return Object.values(requirements).every(Boolean);
+}
+
 async function handleRegister(event) {
   event.preventDefault();
   hideMessage(messageEl);
@@ -39,8 +56,8 @@ async function handleRegister(event) {
     showMessage(messageEl, 'error', 'Preencha todos os campos.');
     return;
   }
-  if (password.length < 6) {
-    showMessage(messageEl, 'error', 'A senha deve ter pelo menos 6 caracteres.');
+  if (!updatePasswordRequirements(password)) {
+    showMessage(messageEl, 'error', 'A senha deve ter 8 caracteres, uma letra maiúscula, um número e um caractere especial.');
     return;
   }
   if (password !== confirmPassword) {
@@ -66,6 +83,11 @@ async function handleRegister(event) {
     });
     if (error) throw error;
 
+    if (!data.user?.identities?.length) {
+      showMessage(messageEl, 'error', 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.');
+      return;
+    }
+
     if (data.session) await supabase.auth.signOut();
     window.location.replace('login.html');
     return;
@@ -89,6 +111,7 @@ async function redirectIfLoggedIn() {
 }
 
 form.addEventListener('submit', handleRegister);
+document.querySelector('#password')?.addEventListener('input', (event) => updatePasswordRequirements(event.target.value));
 initPasswordToggles();
 window.lucide?.createIcons();
 redirectIfLoggedIn();

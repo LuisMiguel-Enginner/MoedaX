@@ -54,7 +54,7 @@ export function mapAuthError(message) {
     return 'O trigger de criação do perfil não está configurado corretamente. Execute novamente o arquivo supabase/schema.sql.';
   }
   if (text.includes('email rate limit exceeded')) {
-    return 'Muitas tentativas de cadastro. Aguarde alguns minutos e tente novamente.';
+    return 'O serviço de e-mail atingiu o limite temporário de envios. Aguarde alguns minutos ou desative a confirmação de e-mail no Supabase para testes da conta demo.';
   }
   if (text.includes('failed to fetch') || text.includes('networkerror')) {
     return 'Não foi possível conectar ao serviço de autenticação. Verifique se o servidor Node está rodando.';
@@ -65,7 +65,7 @@ export function mapAuthError(message) {
   if (text.includes('invalid login credentials')) {
     return 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.';
   }
-  if (text.includes('user already registered')) {
+  if (text.includes('user already registered') || text.includes('email already registered') || text.includes('already exists')) {
     return 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.';
   }
   if (text.includes('password should be at least')) {

@@ -66,14 +66,20 @@
             </div>
             <div class="field field--toggle">
               <i data-lucide="lock" class="field-icon" aria-hidden="true"></i>
-              <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Senha" required minlength="6" />
+              <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Senha" required minlength="8" aria-describedby="passwordRequirements" />
               <button type="button" class="field-toggle" data-toggle-password="#password" aria-label="Mostrar senha">
                 <i data-lucide="eye-off"></i>
               </button>
             </div>
+            <ul id="passwordRequirements" class="password-requirements" aria-label="Requisitos da senha">
+              <li data-requirement="length">Pelo menos 8 caracteres</li>
+              <li data-requirement="uppercase">Uma letra maiúscula</li>
+              <li data-requirement="number">Um número</li>
+              <li data-requirement="special">Um caractere especial</li>
+            </ul>
             <div class="field field--toggle">
               <i data-lucide="lock" class="field-icon" aria-hidden="true"></i>
-              <input id="confirmPassword" name="confirm_password" type="password" autocomplete="new-password" placeholder="Confirmar senha" required minlength="6" />
+              <input id="confirmPassword" name="confirm_password" type="password" autocomplete="new-password" placeholder="Confirmar senha" required minlength="8" />
               <button type="button" class="field-toggle" data-toggle-password="#confirmPassword" aria-label="Mostrar senha">
                 <i data-lucide="eye-off"></i>
               </button>
