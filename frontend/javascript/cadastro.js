@@ -89,7 +89,10 @@ async function handleRegister(event) {
     }
 
     if (data.session) await supabase.auth.signOut();
-    window.location.replace('login.html');
+    showMessage(messageEl, 'success', 'Cadastro realizado com sucesso! Redirecionando para o login...');
+    form.reset();
+    document.querySelectorAll('[data-requirement]').forEach((item) => item.classList.remove('valid'));
+    window.setTimeout(() => window.location.replace('login.html'), 2200);
     return;
   } catch (err) {
     console.error('Erro ao cadastrar usuário:', err);

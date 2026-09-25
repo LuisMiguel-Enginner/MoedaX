@@ -52,7 +52,7 @@ export function addDemoInvestment(userId, { symbol, name, amount, fee, quantity,
 }
 
 function depositModalMarkup() {
-  return `<div class="deposit-modal-backdrop" id="depositModal" hidden><section class="deposit-modal" role="dialog" aria-modal="true" aria-labelledby="depositTitle"><button class="deposit-close" id="depositClose" type="button" aria-label="Fechar"><i data-lucide="x"></i></button><span class="deposit-modal-icon"><i data-lucide="wallet"></i></span><h2 id="depositTitle">Depositar na conta demo</h2><p>Adicione um valor virtual para testar seus investimentos.</p><label for="depositAmount">Valor do depósito</label><div class="deposit-input"><span>R$</span><input id="depositAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0,00" /></div><p class="deposit-error" id="depositError" role="alert"></p><button class="deposit-submit" id="depositSubmit" type="button">Confirmar depósito <i data-lucide="arrow-right"></i></button></section></div>`;
+  return `<div class="deposit-modal-backdrop" id="depositModal" hidden><section class="deposit-modal" role="dialog" aria-modal="true" aria-labelledby="depositTitle"><button class="deposit-close" id="depositClose" type="button" aria-label="Fechar"><i data-lucide="x"></i></button><span class="deposit-modal-icon"><i data-lucide="wallet"></i></span><h2 id="depositTitle">Depositar na conta demo</h2><p>Adicione um valor virtual para testar seus investimentos.</p><label for="depositAmount">Valor do depósito</label><div class="deposit-input"><span>R$</span><input id="depositAmount" type="number" min="0.01" max="9999999999.99" step="0.01" inputmode="decimal" placeholder="0,00" /></div><p class="deposit-error" id="depositError" role="alert"></p><button class="deposit-submit" id="depositSubmit" type="button">Confirmar depósito <i data-lucide="arrow-right"></i></button></section></div>`;
 }
 
 export function initDepositControls(userId, onDeposit) {
@@ -70,6 +70,10 @@ export function initDepositControls(userId, onDeposit) {
     const amount = Number(input.value);
     if (!Number.isFinite(amount) || amount <= 0) {
       error.textContent = 'Digite um valor maior que zero.';
+      return;
+    }
+    if (amount > 9999999999.99 || String(input.value).split('.')[0].replace('-', '').length > 10) {
+      error.textContent = 'O depósito pode ter no máximo 10 dígitos.';
       return;
     }
     const account = addDemoDeposit(userId, amount);
