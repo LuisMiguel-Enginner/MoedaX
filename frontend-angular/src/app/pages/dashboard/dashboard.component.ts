@@ -8,7 +8,18 @@ import { DemoAccount, MarketAsset, MoedaxDataService } from '../../services/moed
   selector: 'app-dashboard',
   standalone: false,
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
+  styles: [`
+    :host { display: block; }
+    .dashboard-message { margin-bottom: 16px; padding: 12px 16px; border-radius: 12px; background: #fff6df; color: #765317; }
+    .nav-item mat-icon { width: 17px; height: 17px; font-size: 17px; }
+    .upgrade-icon mat-icon, .upgrade-link mat-icon { width: 15px; height: 15px; font-size: 15px; }
+    .icon-button mat-icon, .user-menu-btn mat-icon { width: 17px; height: 17px; font-size: 17px; }
+    .deposit-button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+    .deposit-button mat-icon, .fav-change mat-icon { width: 14px; height: 14px; font-size: 14px; }
+    .fav-star mat-icon { width: 16px; height: 16px; font-size: 16px; }
+    .profile-name { min-width: 0; }
+    .user-menu-header span { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  `],
 })
 export class DashboardComponent implements OnInit {
   private readonly auth = inject(AuthService);
@@ -26,6 +37,12 @@ export class DashboardComponent implements OnInit {
   message = '';
   chartPath = '';
   today = new Date();
+  sidebarCollapsed = false;
+  mobileSidebarOpen = false;
+  userMenuOpen = false;
+  selectedPeriod = '7D';
+  yieldPeriod = '7D';
+  selectedYieldSymbol = 'BTC';
 
   async ngOnInit(): Promise<void> {
     this.user = await this.auth.getCurrentUser();
@@ -83,6 +100,42 @@ export class DashboardComponent implements OnInit {
     }));
   }
 
+  get userInitials(): string {
+    const name = this.user?.firstName?.trim() || 'MoedaX';
+    return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toLocaleUpperCase();
+  }
+
+  get todayText(): string {
+    return this.today.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  get yieldAssets(): MarketAsset[] {
+    return this.assets.slice(0, 4);
+  }
+
+  get selectedYieldAsset(): MarketAsset | undefined {
+    return this.assets.find((asset) => asset.symbol === this.selectedYieldSymbol) || this.yieldAssets[0];
+  }
+
+  get selectedYieldInvestment(): number {
+    return this.account.investments
+      .filter((investment) => investment.symbol === this.selectedYieldAsset?.symbol)
+      .reduce((total, investment) => total + investment.amount, 0);
+  }
+
+  get selectedYieldValue(): number {
+    const asset = this.selectedYieldAsset;
+    return asset ? this.data.priceInBrl(asset.price) * (this.account.holdings[asset.symbol] || 0) : 0;
+  }
+
+  get selectedYieldProfit(): number {
+    return this.selectedYieldValue - this.selectedYieldInvestment;
+  }
+
+  get yieldChartPath(): string {
+    return this.chartPath.replace(/(\d+(?:\.\d+)?),/g, (_match, x: string) => `${(Number(x) * 620 / 720).toFixed(1)},`);
+  }
+
   async refresh(): Promise<void> {
     await this.loadDashboard();
   }
@@ -129,6 +182,10 @@ export class DashboardComponent implements OnInit {
   percent(value: number): string {
     const sign = value > 0 ? '+' : '';
     return `${sign}${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+  }
+
+  dataChange(value: string): number {
+    return this.data.changePercent(value);
   }
 
   private async loadDashboard(): Promise<void> {

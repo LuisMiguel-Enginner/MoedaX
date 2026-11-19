@@ -64,7 +64,7 @@
           <h1>Olá, <span>{{ user?.firstName || 'Usuário' }}</span>!</h1>
           <p>Confira o resumo das suas moedas favoritas e acompanhe o mercado.</p>
         </div>
-        <div class="dash-datetime"><span>{{ today | date:'EEEE, d \'de\' MMMM' }}</span><strong>{{ today | date:'HH:mm' }}</strong></div>
+        <div class="dash-datetime"><span>{{ todayText }}</span><strong>{{ today | date:'HH:mm' }}</strong></div>
       </section>
 
       <section class="dash-stats" aria-label="Resumo da carteira">
@@ -153,7 +153,7 @@
 
       <section id="favorites">
         <h2 class="dash-section-title">Suas moedas favoritas</h2>
-        <div class="fav-grid" *ngIf="filteredFavorites.length; else noFavorites">
+        <div class="fav-grid" *ngIf="filteredFavorites.length">
           <article class="fav-card" *ngFor="let asset of filteredFavorites">
             <div class="fav-card-top">
               <div class="fav-asset"><span class="fav-icon" [ngClass]="asset.color">{{ asset.icon }}</span><div><strong>{{ asset.name }}</strong><span>{{ asset.symbol }}</span></div></div>
@@ -169,6 +169,3 @@
     </div>
   </main>
 </div>
-
-<ng-template #noPositions></ng-template>
-<ng-template #noFavorites></ng-template>
