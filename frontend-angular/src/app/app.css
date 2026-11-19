@@ -1,0 +1,68 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.app-toolbar {
+  display: flex;
+  gap: 2rem;
+  padding-inline: max(1.25rem, calc((100vw - 1200px) / 2));
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.active-link {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.page-content {
+  width: min(1200px, calc(100% - 2.5rem));
+  margin: 2rem auto;
+}
+
+.page-content.auth-content {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.page-content.dashboard-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 700px) {
+  .app-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: auto;
+    padding-block: 0.75rem;
+  }
+
+  .main-nav {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .page-content {
+    width: calc(100% - 2rem);
+    margin-block: 1.25rem;
+  }
+}

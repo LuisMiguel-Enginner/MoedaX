@@ -660,3 +660,36 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 560px) {
+  .dash-topbar {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .dash-search {
+    min-width: 0;
+  }
+
+  .dash-welcome {
+    padding: 20px 18px;
+  }
+
+  .yield-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .yield-performance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tracking-card-header,
+  .yield-summary-header,
+  .history-toolbar,
+  .alert-page-heading,
+  .history-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+

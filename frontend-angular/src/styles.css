@@ -1,0 +1,23 @@
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+body.auth-page {
+  font-family: Poppins, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.auth-page .field-error {
+  margin: -0.5rem 0 0;
+  color: #b91c1c;
+  font-size: 0.72rem;
+}

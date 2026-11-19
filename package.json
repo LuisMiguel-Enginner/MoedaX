@@ -4,7 +4,9 @@
   "private": true,
   "description": "Dashboard de comparação e monitoramento de moedas e criptomoedas.",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "node backend/server.js",
+    "start:angular": "npm --prefix frontend-angular start",
+    "build:angular": "npm --prefix frontend-angular run build"
   },
   "dependencies": {
     "dotenv": "^16.4.7"

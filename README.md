@@ -19,6 +19,29 @@ Plataforma de comparação e monitoramento de moedas e criptomoedas.
    - Cadastro: `http://localhost:3000/cadastro.html`
    - Dashboard (após login): `http://localhost:3000/`
 
+## Aplicação Angular
+
+A aplicação Angular inicial está em `frontend-angular/`, separada do site atual para
+preservar o backend e as páginas ainda não migradas. Dashboard, login e cadastro
+estão em Angular com NgModules, componentes `standalone: false` e Angular Material.
+Login e cadastro reutilizam a logo, as imagens e o CSS original em `frontend/` para
+manter a identidade visual anterior.
+O roteamento também contém páginas iniciais para Mercado, Alertas e Histórico, que
+continuam sendo telas demonstrativas. A aplicação usa as APIs e a configuração do
+Supabase existentes, por meio do proxy de desenvolvimento Angular; o backend não foi
+alterado. Foi criada sem SSR/SSG (`--ssr=false`).
+
+Para executar a interface Angular e manter as APIs atuais disponíveis, abra dois
+terminais na raiz do projeto:
+
+1. Terminal 1: `npm start` (backend atual na porta 3000).
+2. Terminal 2: `npm run start:angular` (Angular na porta 4200).
+3. Abra `http://localhost:4200/`.
+
+O login Angular fica em `/login` e o cadastro em `/cadastro`. O site legado continua
+disponível em `http://localhost:3000/login.html`; nenhuma tela antiga foi removida.
+Para compilar, execute `npm run build:angular` na raiz.
+
 ## Configurar Supabase
 
 1. Crie um projeto em [supabase.com](https://supabase.com).

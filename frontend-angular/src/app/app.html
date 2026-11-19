@@ -1,0 +1,17 @@
+<mat-toolbar *ngIf="!isAuthRoute && !isDashboardRoute" class="app-toolbar" color="primary">
+  <a class="brand" routerLink="/" aria-label="MoedaX - Visão geral">
+    <mat-icon aria-hidden="true">currency_exchange</mat-icon>
+    <span>MoedaX</span>
+  </a>
+
+  <nav class="main-nav" aria-label="Navegação principal">
+    <a mat-button routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Visão geral</a>
+    <a mat-button routerLink="/mercado" routerLinkActive="active-link">Mercado</a>
+    <a mat-button routerLink="/alertas" routerLinkActive="active-link">Alertas</a>
+    <a mat-button routerLink="/historico" routerLinkActive="active-link">Histórico</a>
+  </nav>
+</mat-toolbar>
+
+<main class="page-content" [class.auth-content]="isAuthRoute" [class.dashboard-content]="isDashboardRoute">
+  <router-outlet></router-outlet>
+</main>
